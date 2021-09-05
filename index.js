@@ -12,22 +12,23 @@ import {
 
 import * as Arrow from './Arrow';
 
-const { width: screenWidth, height: screenHeight} = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 
-const MINIMUM_TRIM_DURATION = 1000;
-const MAXIMUM_TRIM_DURATION = 60000;
-const MAXIMUM_SCALE_VALUE = 50;
-const ZOOM_MULTIPLIER = 5;
-const INITIAL_ZOOM = 2;
+const MINIMUM_TRIM_DURATION = 2000;
+const MAXIMUM_TRIM_DURATION = 180000;
+const MAXIMUM_SCALE_VALUE = 1;
+const ZOOM_MULTIPLIER = 1;
+const INITIAL_ZOOM = 1;
 const SCALE_ON_INIT_TYPE = 'trim-duration'
-const SHOW_SCROLL_INDICATOR = true
-const CENTER_ON_LAYOUT = true
+const SHOW_SCROLL_INDICATOR = false
+const CENTER_ON_LAYOUT = false
 
 const TRACK_PADDING_OFFSET = 10;
-const HANDLE_WIDTHS = 30;
+const HANDLE_WIDTHS = 20;
+const SCRUBBER_WIDTHS = 10;
 
-const MARKER_INCREMENT = 5000;
+const MARKER_INCREMENT = 1000;
 const SPECIAL_MARKER_INCREMEMNT = 5;
 
 const TRACK_BACKGROUND_COLOR = '#f2f6f5';
@@ -41,8 +42,8 @@ export default class Trimmer extends React.Component {
     super(props);
 
     let trackScale = props.initialZoomValue || INITIAL_ZOOM
-    if(props.scaleInOnInit) {
-      const { 
+    if (props.scaleInOnInit) {
+      const {
         maxTrimDuration = MAXIMUM_TRIM_DURATION,
         scaleInOnInitType = SCALE_ON_INIT_TYPE,
         trimmerRightHandlePosition,
@@ -53,7 +54,7 @@ export default class Trimmer extends React.Component {
       const smartScaleDivider = isMaxDuration ? 3 : 5; // Based on testing, 3 works better when the goal is to have the entire trimmer fit in the visible area
       const percentTrimmed = trimDuration / props.totalDuration;
       const smartScaleValue = (2 / percentTrimmed) / smartScaleDivider;
-      trackScale = this.clamp({ value: smartScaleValue, min: 1, max: props.maximumZoomLevel || MAXIMUM_SCALE_VALUE})
+      trackScale = this.clamp({ value: smartScaleValue, min: 1, max: props.maximumZoomLevel || MAXIMUM_SCALE_VALUE })
     }
 
     this.initiateAnimator();
@@ -66,11 +67,11 @@ export default class Trimmer extends React.Component {
       internalScrubbingPosition: 0,
     }
   }
-  
+
   clamp = ({ value, min, max }) => Math.min(Math.max(value, min), max);
 
   initiateAnimator = () => {
-    
+
     this.scaleTrackValue = new Animated.Value(0);
     this.lastDy = 0;
     this.trackPanResponder = this.createTrackPanResponder()
@@ -100,12 +101,12 @@ export default class Trimmer extends React.Component {
         trimmerRightHandlePosition,
         totalDuration,
       } = this.props;
-      
+
       const trackWidth = (screenWidth) * trackScale
       const calculatedScrubberPosition = (scrubberPosition / totalDuration) * trackWidth;
-      
-      const newScrubberPosition = ((calculatedScrubberPosition + gestureState.dx) / trackWidth ) * totalDuration
-      
+
+      const newScrubberPosition = ((calculatedScrubberPosition + gestureState.dx) / trackWidth) * totalDuration
+
       const lowerBound = Math.max(0, trimmerLeftHandlePosition)
       const upperBound = trimmerRightHandlePosition
 
@@ -114,7 +115,7 @@ export default class Trimmer extends React.Component {
         min: lowerBound,
         max: upperBound
       })
-      
+
       this.setState({ internalScrubbingPosition: newBoundedScrubberPosition })
     },
     onPanResponderRelease: (evt, gestureState) => {
@@ -140,18 +141,18 @@ export default class Trimmer extends React.Component {
     },
     onPanResponderMove: (evt, gestureState) => {
       const { trackScale } = this.state;
-      const { 
+      const {
         trimmerRightHandlePosition,
         totalDuration,
         minimumTrimDuration = MINIMUM_TRIM_DURATION,
         maxTrimDuration = MAXIMUM_TRIM_DURATION,
       } = this.props;
-      
+
       const trackWidth = screenWidth * trackScale
       const calculatedTrimmerRightHandlePosition = (trimmerRightHandlePosition / totalDuration) * trackWidth;
 
-      const newTrimmerRightHandlePosition = ((calculatedTrimmerRightHandlePosition + gestureState.dx) / trackWidth ) * totalDuration
-    
+      const newTrimmerRightHandlePosition = ((calculatedTrimmerRightHandlePosition + gestureState.dx) / trackWidth) * totalDuration
+
       const lowerBound = minimumTrimDuration
       const upperBound = totalDuration
 
@@ -167,6 +168,7 @@ export default class Trimmer extends React.Component {
           trimmingLeftHandleValue: newBoundedTrimmerRightHandlePosition - maxTrimDuration,
         })
       } else if (newBoundedTrimmerRightHandlePosition - this.state.trimmingLeftHandleValue <= minimumTrimDuration) {
+        // return;
         this.setState({
           trimmingRightHandleValue: newBoundedTrimmerRightHandlePosition,
           trimmingLeftHandleValue: newBoundedTrimmerRightHandlePosition - minimumTrimDuration,
@@ -205,12 +207,12 @@ export default class Trimmer extends React.Component {
         minimumTrimDuration = MINIMUM_TRIM_DURATION,
         maxTrimDuration = MAXIMUM_TRIM_DURATION,
       } = this.props;
-      
+
       const trackWidth = (screenWidth) * trackScale
       const calculatedTrimmerLeftHandlePosition = (trimmerLeftHandlePosition / totalDuration) * trackWidth;
-      
-      const newTrimmerLeftHandlePosition = ((calculatedTrimmerLeftHandlePosition + gestureState.dx) / trackWidth ) * totalDuration
-      
+
+      const newTrimmerLeftHandlePosition = ((calculatedTrimmerLeftHandlePosition + gestureState.dx) / trackWidth) * totalDuration
+
       const lowerBound = 0
       const upperBound = totalDuration - minimumTrimDuration
 
@@ -226,9 +228,13 @@ export default class Trimmer extends React.Component {
           trimmingLeftHandleValue: newBoundedTrimmerLeftHandlePosition,
         })
       } else if (this.state.trimmingRightHandleValue - newBoundedTrimmerLeftHandlePosition <= minimumTrimDuration) {
+        // this.setState({
+        //   trimmingRightHandleValue: newBoundedTrimmerLeftHandlePosition,
+        //   trimmingLeftHandleValue: newBoundedTrimmerLeftHandlePosition - minimumTrimDuration,
+        // })
         this.setState({
-          trimmingRightHandleValue: newBoundedTrimmerLeftHandlePosition,
-          trimmingLeftHandleValue: newBoundedTrimmerLeftHandlePosition - minimumTrimDuration,
+          trimmingRightHandleValue: newBoundedTrimmerLeftHandlePosition + minimumTrimDuration,
+          trimmingLeftHandleValue: newBoundedTrimmerLeftHandlePosition,
         })
       } else {
         this.setState({ trimmingLeftHandleValue: newBoundedTrimmerLeftHandlePosition })
@@ -248,59 +254,59 @@ export default class Trimmer extends React.Component {
     const distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
     return distance
   }
-  
+
   createTrackPanResponder = () => PanResponder.create({
-      // Ask to be the responder:
-      onStartShouldSetPanResponder: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
-      onStartShouldSetPanResponderCapture: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
-      onMoveShouldSetPanResponder: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
-      onPanResponderGrant: (evt, gestureState) => {
-        this.lastScaleDy = 0;
-        const touches = evt.nativeEvent.touches || {};
+    // Ask to be the responder:
+    onStartShouldSetPanResponder: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
+    onStartShouldSetPanResponderCapture: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
+    onMoveShouldSetPanResponder: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
+    onMoveShouldSetPanResponderCapture: (evt, gestureState) => !this.state.scrubbing && !this.state.trimming,
+    onPanResponderGrant: (evt, gestureState) => {
+      this.lastScaleDy = 0;
+      const touches = evt.nativeEvent.touches || {};
 
-        if (touches.length == 2) {
-          const pinchDistance = this.calculatePinchDistance(touches[0].pageX, touches[0].pageY, touches[1].pageX, touches[1].pageY);
+      if (touches.length == 2) {
+        const pinchDistance = this.calculatePinchDistance(touches[0].pageX, touches[0].pageY, touches[1].pageX, touches[1].pageY);
 
-          this.lastScalePinchDist = pinchDistance;
-        } 
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        const touches = evt.nativeEvent.touches;
-        const { maximumZoomLevel = MAXIMUM_SCALE_VALUE, zoomMultiplier = ZOOM_MULTIPLIER } = this.props;
+        this.lastScalePinchDist = pinchDistance;
+      }
+    },
+    onPanResponderMove: (evt, gestureState) => {
+      const touches = evt.nativeEvent.touches;
+      const { maximumZoomLevel = MAXIMUM_SCALE_VALUE, zoomMultiplier = ZOOM_MULTIPLIER } = this.props;
 
-        if (touches.length == 2) {
-          const pinchDistance = this.calculatePinchDistance(touches[0].pageX, touches[0].pageY, touches[1].pageX, touches[1].pageY);
+      if (touches.length == 2) {
+        const pinchDistance = this.calculatePinchDistance(touches[0].pageX, touches[0].pageY, touches[1].pageX, touches[1].pageY);
 
-          if(this.lastScalePinchDist === undefined) {
-            this.lastScalePinchDist = pinchDistance
-          }
-
-          const stepValue = pinchDistance - this.lastScalePinchDist;
+        if (this.lastScalePinchDist === undefined) {
           this.lastScalePinchDist = pinchDistance
-  
-          const scaleStep = (stepValue * zoomMultiplier) / screenHeight
-          const { trackScale } = this.state;
-  
-          const newTrackScaleValue = trackScale + scaleStep;
-          const newBoundedTrackScaleValue = Math.max(Math.min(newTrackScaleValue, maximumZoomLevel), 1)
-  
-          this.setState({trackScale: newBoundedTrackScaleValue})
-        } else {
-          const stepValue = (gestureState.dy - this.lastScaleDy);
-          this.lastScaleDy = gestureState.dy
-  
-          const scaleStep = (stepValue * zoomMultiplier) / screenHeight
-          const { trackScale } = this.state;
-  
-          const newTrackScaleValue = trackScale + scaleStep;
-          const newBoundedTrackScaleValue = Math.max(Math.min(newTrackScaleValue, maximumZoomLevel), 1)
-  
-          this.setState({trackScale: newBoundedTrackScaleValue})
         }
-      },
-      onPanResponderTerminationRequest: (evt, gestureState) => true,
-      onShouldBlockNativeResponder: (evt, gestureState) => true
+
+        const stepValue = pinchDistance - this.lastScalePinchDist;
+        this.lastScalePinchDist = pinchDistance
+
+        const scaleStep = (stepValue * zoomMultiplier) / screenHeight
+        const { trackScale } = this.state;
+
+        const newTrackScaleValue = trackScale + scaleStep;
+        const newBoundedTrackScaleValue = Math.max(Math.min(newTrackScaleValue, maximumZoomLevel), 1)
+
+        this.setState({ trackScale: newBoundedTrackScaleValue })
+      } else {
+        const stepValue = (gestureState.dy - this.lastScaleDy);
+        this.lastScaleDy = gestureState.dy
+
+        const scaleStep = (stepValue * zoomMultiplier) / screenHeight
+        const { trackScale } = this.state;
+
+        const newTrackScaleValue = trackScale + scaleStep;
+        const newBoundedTrackScaleValue = Math.max(Math.min(newTrackScaleValue, maximumZoomLevel), 1)
+
+        this.setState({ trackScale: newBoundedTrackScaleValue })
+      }
+    },
+    onPanResponderTerminationRequest: (evt, gestureState) => true,
+    onShouldBlockNativeResponder: (evt, gestureState) => true
   })
 
   handleScrubbingValueChange = (newScrubPosition) => {
@@ -356,7 +362,7 @@ export default class Trimmer extends React.Component {
     //   return null
     // }
 
-    if(minimumTrimDuration > trimmerRightHandlePosition - trimmerLeftHandlePosition) {
+    if (minimumTrimDuration > trimmerRightHandlePosition - trimmerLeftHandlePosition) {
       console.error('minimumTrimDuration is less than trimRightHandlePosition minus trimmerLeftHandlePosition', {
         minimumTrimDuration, trimmerRightHandlePosition, trimmerLeftHandlePosition
       })
@@ -372,15 +378,17 @@ export default class Trimmer extends React.Component {
       trimmingRightHandleValue
     } = this.state;
 
-    const trackWidth = screenWidth * trackScale
-    if(isNaN(trackWidth)) {
+    let trackWidth = screenWidth * trackScale
+    trackWidth = trackWidth * 0.75;
+    if (isNaN(trackWidth)) {
       console.log('ERROR render() trackWidth !== number. screenWidth', screenWidth, ', trackScale', trackScale, ', ', trackWidth)
     }
     const trackBackgroundStyles = [
       styles.trackBackground,
-      { width: trackWidth, backgroundColor: trackBackgroundColor, borderColor: trackBorderColor
-    }];
-        
+      {
+        width: trackWidth, backgroundColor: trackBackgroundColor, borderColor: trackBorderColor
+      }];
+
     const leftPosition = trimming ? trimmingLeftHandleValue : trimmerLeftHandlePosition
     const rightPosition = trimming ? trimmingRightHandleValue : trimmerRightHandlePosition
     const scrubPosition = scrubbing ? internalScrubbingPosition : scrubberPosition
@@ -391,18 +399,18 @@ export default class Trimmer extends React.Component {
 
     const actualTrimmerWidth = (boundedTrimTime / totalDuration) * trackWidth;
     const actualTrimmerOffset = ((boundedLeftPosition / totalDuration) * trackWidth) + TRACK_PADDING_OFFSET + HANDLE_WIDTHS;
-    const actualScrubPosition = ((boundedScrubPosition / totalDuration) * trackWidth) + TRACK_PADDING_OFFSET + HANDLE_WIDTHS;
- 
-    const onLayoutHandler = centerOnLayout
-        ? {
-            onLayout: () => {
-            const centerOffset = actualTrimmerOffset + (actualTrimmerWidth / 2) - (screenWidth / 2);
-            this.scrollView.scrollTo({x: centerOffset, y: 0, animated: false});
-            }
-        }
-        : null
+    const actualScrubPosition = ((boundedScrubPosition / totalDuration) * trackWidth) + TRACK_PADDING_OFFSET + HANDLE_WIDTHS / 2 + SCRUBBER_WIDTHS / 2;
 
-    if(isNaN(actualTrimmerWidth)) {
+    const onLayoutHandler = centerOnLayout
+      ? {
+        onLayout: () => {
+          const centerOffset = actualTrimmerOffset + (actualTrimmerWidth / 2) - (screenWidth / 2);
+          this.scrollView.scrollTo({ x: centerOffset, y: 0, animated: false });
+        }
+      }
+      : null
+
+    if (isNaN(actualTrimmerWidth)) {
       console.log('ERROR render() actualTrimmerWidth !== number. boundedTrimTime', boundedTrimTime, ', totalDuration', totalDuration, ', trackWidth', trackWidth)
     }
 
@@ -410,65 +418,54 @@ export default class Trimmer extends React.Component {
 
     return (
       <View style={styles.root}>
-        <ScrollView 
-          ref={scrollView => this.scrollView = scrollView}
-          scrollEnabled={!trimming && !scrubbing}
+        <View
+          // ref={scrollView => this.scrollView = scrollView}
+          // scrollEnabled={!trimming && !scrubbing}
           style={[
             styles.horizontalScrollView,
             { transform: [{ scaleX: 1.0 }] },
-          ]} 
-          horizontal
-          showsHorizontalScrollIndicator={showScrollIndicator}
-          {...{...this.trackPanResponder.panHandlers, ...onLayoutHandler}}
+          ]}
+        // horizontal
+        // showsHorizontalScrollIndicator={showScrollIndicator}
+        // {...{ ...this.trackPanResponder.panHandlers, ...onLayoutHandler }}
         >
           <View style={trackBackgroundStyles}>
             <View style={styles.markersContainer}>
               {
-                markers.map((m,i) => (
-                  <View 
-                    key={`marker-${i}`} 
+                markers.map((m, i) => (
+                  <View
+                    key={`marker-${i}`}
                     style={[
                       styles.marker,
                       i % SPECIAL_MARKER_INCREMEMNT ? {} : styles.specialMarker,
                       i === 0 || i === markers.length - 1 ? styles.hiddenMarker : {},
                       { backgroundColor: markerColor }
-                    ]}/>
+                    ]} />
                 ))
               }
             </View>
           </View>
-          {
-            typeof scrubberPosition === 'number'
-              ? (
-                <View style={[
-                    styles.scrubberContainer,
-                    { left: actualScrubPosition },
-                  ]} 
-                  hitSlop={{top: 8, bottom: 8, right: 8, left: 8}}
-                  {...this.scrubHandlePanResponder.panHandlers}
-                >
-                  <View
-                    style={[styles.scrubberHead, { backgroundColor: scrubberColor }]}
-                  />
-                  <View style={[styles.scrubberTail, { backgroundColor: scrubberColor }]} />
-                </View>
-              )
-              : null
-          }
+          <View style={[styles.scrubberContainer, { left: actualScrubPosition },]}>
+            <View style={[styles.scrubberHead, { backgroundColor: scrubberColor }]} />
+            <View style={[styles.scrubberTail, { backgroundColor: scrubberColor }]} />
+          </View>
+
           <View {...this.leftHandlePanResponder.panHandlers} style={[
-            styles.handle, 
+            styles.handle,
             styles.leftHandle,
             { backgroundColor: tintColor, left: actualTrimmerOffset - HANDLE_WIDTHS }
           ]}>
             <Arrow.Left />
           </View>
+
           <View style={[
             styles.trimmer,
             { width: actualTrimmerWidth, left: actualTrimmerOffset },
             { borderColor: tintColor }
           ]}>
-            <View style={[styles.selection, { backgroundColor: tintColor }]}/>
+            <View style={[styles.selection, { backgroundColor: tintColor }]} />
           </View>
+
           <View {...this.rightHandlePanResponder.panHandlers} style={[
             styles.handle,
             styles.rightHandle,
@@ -476,7 +473,7 @@ export default class Trimmer extends React.Component {
           ]} >
             <Arrow.Right />
           </View>
-        </ScrollView>
+        </View>
       </View>
     );
   }
@@ -484,10 +481,13 @@ export default class Trimmer extends React.Component {
 
 const styles = StyleSheet.create({
   root: {
-    height: 140,
+    height: 60,
+    marginTop: 40,
   },
   horizontalScrollView: {
-    height: 140,
+    height: 60,
+    marginStart: 'auto',
+    marginEnd: 'auto',
     overflow: 'hidden',
     position: 'relative',
   },
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: TRACK_BORDER_COLOR,
-    height: 100,
+    height: 37,
     marginHorizontal: HANDLE_WIDTHS + TRACK_PADDING_OFFSET,
   },
   trimmer: {
@@ -506,13 +506,17 @@ const styles = StyleSheet.create({
     left: TRACK_PADDING_OFFSET,
     top: 17,
     borderColor: TINT_COLOR,
-    borderWidth: 3,
-    height: 106,
+    // borderWidth: 3,
+    // backgroundColor: TRACK_BACKGROUND_COLOR,
+    borderTopWidth: 3,
+    borderBottomWidth: 3,
+    // borderStartColor:TRACK_BACKGROUND_COLOR,
+    height: 43,
   },
   handle: {
     position: 'absolute',
     width: HANDLE_WIDTHS,
-    height: 106,
+    height: 43,
     backgroundColor: TINT_COLOR,
     top: 17,
   },
@@ -552,7 +556,8 @@ const styles = StyleSheet.create({
   scrubberContainer: {
     zIndex: 1,
     position: 'absolute',
-    width: 14,
+    width: SCRUBBER_WIDTHS,
+    paddingTop: 10,
     height: "100%",
     // justifyContent: 'center',
     alignItems: 'center',
@@ -560,15 +565,17 @@ const styles = StyleSheet.create({
   scrubberHead: {
     position: 'absolute',
     backgroundColor: SCRUBBER_COLOR,
-    width: 14,
-    height: 14,
-    borderRadius: 14,
+    width: SCRUBBER_WIDTHS,
+    marginTop: SCRUBBER_WIDTHS - 1,
+    height: SCRUBBER_WIDTHS,
+    borderRadius: SCRUBBER_WIDTHS,
   },
   scrubberTail: {
+    paddingTop: SCRUBBER_WIDTHS,
     backgroundColor: SCRUBBER_COLOR,
-    height: 123,
-    width: 3,
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
+    height: 50,
+    width: 2,
+    borderBottomLeftRadius: SCRUBBER_WIDTHS,
+    borderBottomRightRadius: SCRUBBER_WIDTHS,
   },
 });
