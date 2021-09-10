@@ -445,7 +445,7 @@ export default class Trimmer extends React.Component {
               }
             </View>
           </View>
-          <View style={[styles.scrubberContainer, { left: actualScrubPosition },]}>
+          <View style={[styles.scrubberContainer, { left: actualScrubPosition }]}  pointerEvents="none">
             <View style={[styles.scrubberHead, { backgroundColor: scrubberColor }]} />
             <View style={[styles.scrubberTail, { backgroundColor: scrubberColor }]} />
           </View>
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     position: 'absolute',
     width: SCRUBBER_WIDTHS,
-    paddingTop: 10,
+    paddingTop: 17,
     height: "100%",
     // justifyContent: 'center',
     alignItems: 'center',
@@ -565,16 +565,16 @@ const styles = StyleSheet.create({
   scrubberHead: {
     position: 'absolute',
     backgroundColor: SCRUBBER_COLOR,
-    width: SCRUBBER_WIDTHS,
-    marginTop: SCRUBBER_WIDTHS - 1,
-    height: SCRUBBER_WIDTHS,
+    width: 7,
+    marginTop: SCRUBBER_WIDTHS +1,
+    height: 7,
     borderRadius: SCRUBBER_WIDTHS,
   },
   scrubberTail: {
     paddingTop: SCRUBBER_WIDTHS,
     backgroundColor: SCRUBBER_COLOR,
     height: 50,
-    width: 2,
+    width: 1.5,
     borderBottomLeftRadius: SCRUBBER_WIDTHS,
     borderBottomRightRadius: SCRUBBER_WIDTHS,
   },
