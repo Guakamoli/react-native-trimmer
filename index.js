@@ -414,8 +414,8 @@ export default class Trimmer extends React.Component {
       console.log('ERROR render() actualTrimmerWidth !== number. boundedTrimTime', boundedTrimTime, ', totalDuration', totalDuration, ', trackWidth', trackWidth)
     }
 
-    const markers = new Array((totalDuration / MARKER_INCREMENT) | 0).fill(0) || [];
-
+    // const markers = new Array((totalDuration / MARKER_INCREMENT) | 0).fill(0) || [];
+    const markers = new Array(11 | 0).fill(0) || [];
     return (
       <View style={styles.root}>
         <View
