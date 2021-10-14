@@ -8,6 +8,7 @@ import {
   PanResponder,
   Animated,
   TouchableHighlight,
+  Image,
 } from 'react-native';
 
 import * as Arrow from './Arrow';
@@ -386,7 +387,7 @@ export default class Trimmer extends React.Component {
     const trackBackgroundStyles = [
       styles.trackBackground,
       {
-        width: trackWidth, backgroundColor: trackBackgroundColor, borderColor: trackBorderColor
+        width: trackWidth, backgroundColor: 'trackBackgroundColor',
       }];
 
     const leftPosition = trimming ? trimmingLeftHandleValue : trimmerLeftHandlePosition
@@ -429,8 +430,15 @@ export default class Trimmer extends React.Component {
         // showsHorizontalScrollIndicator={showScrollIndicator}
         // {...{ ...this.trackPanResponder.panHandlers, ...onLayoutHandler }}
         >
-          <View style={trackBackgroundStyles}>
-            <View style={styles.markersContainer}>
+          <View style={[trackBackgroundStyles, { height: 62 }]}>
+
+
+            <ScrollView horizontal={true} contentContainerStyle={{ position: "relative", }} showsHorizontalScrollIndicator={false} >
+              <Image source={{ uri: 'https://guakamoli1-video-message-dev.oss-cn-qingdao.aliyuncs.com/default/3494e33ecbbb5b955a1c84bd6b8a0626/116c7efd-96bc-46ca-92d7-3008f32c09c5.jpg' }} style={{ width: 2000, height: 63 }} />
+
+            </ScrollView>
+
+            {/* <View style={styles.markersContainer}>
               {
                 markers.map((m, i) => (
                   <View
@@ -443,38 +451,39 @@ export default class Trimmer extends React.Component {
                     ]} />
                 ))
               }
-            </View>
+            </View> */}
           </View>
-          <View style={[styles.scrubberContainer, { left: actualScrubPosition }]}  pointerEvents="none">
-            <View style={[styles.scrubberHead, { backgroundColor: scrubberColor }]} />
-            <View style={[styles.scrubberTail, { backgroundColor: scrubberColor }]} />
+          <View style={[styles.scrubberContainer, { left: actualScrubPosition }]} pointerEvents="none">
+            {/* <View style={[styles.scrubberHead, { backgroundColor: scrubberColor }]} /> */}
+            {/* 选中指针 */}
+            <View style={[styles.scrubberTail, { backgroundColor: "#fff" }]} />
           </View>
-
+          {/* 左侧按钮 */}
           <View {...this.leftHandlePanResponder.panHandlers} style={[
             styles.handle,
-            styles.leftHandle,
+            // styles.leftHandle,
             { backgroundColor: tintColor, left: actualTrimmerOffset - HANDLE_WIDTHS }
           ]}>
             <Arrow.Left />
           </View>
-
+          {/* 中间内容 */}
           <View style={[
             styles.trimmer,
             { width: actualTrimmerWidth, left: actualTrimmerOffset },
-            { borderColor: tintColor }
+            // { borderColor: tintColor }
           ]}>
             <View style={[styles.selection, { backgroundColor: tintColor }]} />
           </View>
-
+          {/*  右侧按钮*/}
           <View {...this.rightHandlePanResponder.panHandlers} style={[
             styles.handle,
-            styles.rightHandle,
+            // styles.rightHandle,
             { backgroundColor: tintColor, left: actualTrimmerOffset + actualTrimmerWidth }
           ]} >
             <Arrow.Right />
           </View>
-        </View>
-      </View>
+        </View >
+      </View >
     );
   }
 }
@@ -494,32 +503,33 @@ const styles = StyleSheet.create({
     backgroundColor: TRACK_BACKGROUND_COLOR,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: TRACK_BORDER_COLOR,
+    // borderColor: TRACK_BORDER_COLOR,
     height: 40,
     marginHorizontal: HANDLE_WIDTHS + TRACK_PADDING_OFFSET,
   },
   trimmer: {
     position: 'absolute',
     left: TRACK_PADDING_OFFSET,
-    top: 8,
-    borderColor: TINT_COLOR,
-    // borderWidth: 3,
+    top: 10,
+    borderColor: 'red',
+    // borderWidth: 1,
     // backgroundColor: TRACK_BACKGROUND_COLOR,
-    borderTopWidth: 3,
-    borderBottomWidth: 3,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
     // borderStartColor:TRACK_BACKGROUND_COLOR,
-    height: 44,
+    height: 62,
   },
   handle: {
     position: 'absolute',
     width: HANDLE_WIDTHS,
-    height: 44,
+    height: 62,
     backgroundColor: TINT_COLOR,
-    top: 8,
+    // width:15,
+    top: 10,
   },
   leftHandle: {
-    borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10,
+    // borderTopLeftRadius: 10,
+    // borderBottomLeftRadius: 10,
   },
   rightHandle: {
     borderTopRightRadius: 10,
@@ -570,9 +580,12 @@ const styles = StyleSheet.create({
   scrubberTail: {
     paddingTop: SCRUBBER_WIDTHS,
     backgroundColor: SCRUBBER_COLOR,
-    height: 44,
+    height: 60,
     width: 1.5,
     borderBottomLeftRadius: SCRUBBER_WIDTHS,
     borderBottomRightRadius: SCRUBBER_WIDTHS,
+    position: 'relative',
+    top: 2
+
   },
 });

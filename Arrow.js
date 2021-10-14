@@ -10,11 +10,11 @@ import {
   TouchableHighlight,
 } from 'react-native';
 
-const BaseArrow = ({rotationStyle}) => {
+const BaseArrow = ({ rotationStyle }) => {
   return (
     <View style={[styles.root, rotationStyle]}>
-      <View style={[styles.arrow, styles.top]}/>
-      <View style={[styles.arrow, styles.bottom]}/>
+      <View style={[styles.arrow, styles.top]} />
+      <View style={[styles.arrow, styles.bottom]} />
     </View>
   )
 }
@@ -29,35 +29,35 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   rootRight: {
-    transform: [{ rotate: '180deg'}],
+    transform: [{ rotate: '180deg' }],
   },
   arrow: {
     position: 'absolute',
-    height: 10,
+    height: 18,
     width: 2,
     backgroundColor: 'white'
   },
   top: {
-    transform: [{ rotate: '20deg'}],
-    borderTopLeftRadius: 2,
-    borderTopRightRadius: 2,
-    bottom: '49%',
+    // transform: [{ rotate: '20deg'}],
+    // borderTopLeftRadius: 2,
+    // borderTopRightRadius: 2,
+    // bottom: '49%',
   },
   bottom: {
-    transform: [{ rotate: '-20deg'}],
-    borderBottomLeftRadius: 2,
-    borderBottomRightRadius: 2,
-    top: '49%',
+    // transform: [{ rotate: '-20deg' }],
+    // borderBottomLeftRadius: 2,
+    // borderBottomRightRadius: 2,
+    // top: '49%',
   }
 });
 
 
 export const Left = props => (
-  <BaseArrow { ...props } rotationStyle={styles.rootLeft} />
+  <BaseArrow {...props} rotationStyle={styles.rootLeft} />
 );
 
 export const Right = props => (
-  <BaseArrow { ...props } rotationStyle={styles.rootRight} />
+  <BaseArrow {...props} rotationStyle={styles.rootRight} />
 );
 
 
